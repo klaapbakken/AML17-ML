@@ -24,9 +24,9 @@ def word_split(text):
     return word_dict
 
 
-def get_all_words(text_list):
+def get_all_words(start, text_list):
     local_word_list = []
-    for i in range(len(text_list)):
+    for i in range(start, len(text_list) + start):
         text = text_list[i]
         word_dict = word_split(text)
         for word in word_dict:
