@@ -51,3 +51,33 @@ def top_words(n, word_dict):
     for i in range(n):
         top_dict[sorted_keys[i]] = word_dict[sorted_keys[i]]
     return top_dict
+
+
+def text_dict_check(text_dict, english_dict_set):
+    correct_words = 0
+    incorrect_words = 0
+    text_set = set(text_dict.keys())
+    for word in text_set:
+        if word in english_dict_set:
+            correct_words += 1
+    return correct_words / len(text_dict)
+
+
+def create_design_matrix(data, english_dict_set):
+    features = 3
+    observations = len(data)
+    X = np.zeros((observations, features))
+    for i in range(observations):
+        mail = data.text.iloc[i]
+        # Number of unique words
+        d = word_split(mail)
+        X[i, 0] = len(d) / sum(d.values())
+        # Proportion correct words
+        X[i, 1] = text_dict_check(d, english_dict_set)
+    return X
+
+
+def create_response_vector(data):
+    Y = np.array(data.spam)
+    Y[Y == 0] = -1
+    return Y
