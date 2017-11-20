@@ -81,3 +81,15 @@ def create_response_vector(data):
     Y = np.array(data.spam)
     Y[Y == 0] = -1
     return Y
+
+
+def data_split(data):
+    test_indices = np.random.choice(len(data), len(data) // 5)
+    train_indices = np.array([i for i in range(len(data)) if i not in test_indices])
+    Y = create_response_vector(data)
+    X = create_design_matrix(data, english_words_set)
+    X_train = X[train_indices]
+    Y_train = Y[train_indices]
+    X_test = X[test_indices]
+    Y_test = Y[test_indices]
+    return X_train, X_test, Y_train, Y_test
