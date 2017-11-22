@@ -1,0 +1,11 @@
+hey
+hello
+hi
+dear
+regards
+love
+morning
+evening
+afternoon
+day
+
