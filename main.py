@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from operator import itemgetter
+import json
+from sklearn.feature_extraction.text import CountVectorizer
 
 
 def word_split(text):
@@ -53,6 +55,15 @@ def top_words(n, word_dict):
     return top_dict
 
 
+def personal_names_check(text_dict, english_name_set):
+    personal_names = 0
+    text_set = set(text_dict.keys())
+    for word in text_set:
+        if word in english_name_set:
+            personal_names += 1
+    return personal_names
+
+
 def text_dict_check(text_dict, english_dict_set):
     correct_words = 0
     incorrect_words = 0
@@ -63,33 +74,44 @@ def text_dict_check(text_dict, english_dict_set):
     return correct_words / len(text_dict)
 
 
-def create_design_matrix(data, english_dict_set):
-    features = 3
+def create_design_matrix(data, ew_set, ef_set, el_set, g_set, i_set, d_set):
+    bow = bag_of_words(data.text)
     observations = len(data)
+    features = 9 + bow.shape[1]
     X = np.zeros((observations, features))
     for i in range(observations):
         mail = data.text.iloc[i]
-        # Number of unique words
         d = word_split(mail)
+        # Proportion of unique words
         X[i, 0] = len(d) / sum(d.values())
         # Proportion correct words
-        X[i, 1] = text_dict_check(d, english_dict_set)
+        X[i, 1] = text_dict_check(d, ew_set)
+        # Number of personal names
+        X[i, 2] = personal_names_check(d, ef_set)
+        # Number of last names
+        X[i, 3] = personal_names_check(d, el_set)
+        # Number of greetings
+        X[i, 4] = personal_names_check(d, g_set)
+        # Number of indicators
+        X[i, 5] = personal_names_check(d, i_set)
+        # Presence of days, months, holidays
+        X[i, 6] = personal_names_check(d, d_set)
+        # Number of words
+        X[i, 7] = sum(d.values())
+        # Average word length
+        av_len = 0
+        for word in d:
+            av_len += len(word) / sum(d.values())
+        X[i, 8] = av_len
+        X[i, 9:] = np.array(bow[i, :])
     return X
 
 
 def create_response_vector(data):
-    Y = np.array(data.spam)
-    Y[Y == 0] = -1
+    Y = data.spam.values
     return Y
 
 
-def data_split(data):
-    test_indices = np.random.choice(len(data), len(data) // 5)
-    train_indices = np.array([i for i in range(len(data)) if i not in test_indices])
-    Y = create_response_vector(data)
-    X = create_design_matrix(data, english_words_set)
-    X_train = X[train_indices]
-    Y_train = Y[train_indices]
-    X_test = X[test_indices]
-    Y_test = Y[test_indices]
-    return X_train, X_test, Y_train, Y_test
+def bag_of_words(emails):
+    CV = CountVectorizer()
+    return CV.fit_transform(emails).toarray()
