@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from operator import itemgetter
 import json
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 
 def word_split(text):
@@ -107,6 +107,16 @@ def create_design_matrix(data, ew_set, ef_set, el_set, g_set, i_set, d_set):
     return X
 
 
+def create_bow_matrix(data):
+    bow = bag_of_words(data.text)
+    observations = len(data)
+    features = bow.shape[1]
+    X = np.zeros((observations, features))
+    for i in range(observations):
+        X[i, :] = np.array(bow[i, :])
+    return X
+
+
 def create_response_vector(data):
     Y = data.spam.values
     return Y
@@ -115,3 +125,8 @@ def create_response_vector(data):
 def bag_of_words(emails):
     CV = CountVectorizer()
     return CV.fit_transform(emails).toarray()
+
+
+def tfidf(emails):
+    tfidf = TfidfVectorizer()
+    return tfidf.fit_transform(emails).toarray()

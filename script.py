@@ -20,21 +20,6 @@ all_data = all_data.sort_values('id')
 train_indices = train_data.id.values
 test_indices = test_data.id.values
 
-emails = train_data.text
-all_words = local_words(emails)
-
-spam = train_data.text[train_data.spam > 0]
-spam_words = local_words(spam)
-
-non_spam = train_data.text[train_data.spam < 1]
-non_spam_words = local_words(non_spam)
-
-email_dict = local_word_dict(emails)
-
-spam_dict = local_word_dict(spam)
-
-non_spam_dict = local_word_dict(non_spam)
-
 english_dict_file = os.path.join(dict_path, 'words_dictionary.json')
 with open(english_dict_file,"r") as english_dictionary:
     english_words_dict = json.load(english_dictionary)
@@ -69,8 +54,9 @@ dates = pd.read_csv(indicator_file, header=None)
 dates_list = indicators.iloc[:, 0]
 date_set = set(indicators_list)
 
-X = create_design_matrix(all_data, english_words_set, english_fname_set, english_lname_set,
-                         greetings_set, indicators_set, date_set)
+#X = create_design_matrix(all_data, english_words_set, english_fname_set, english_lname_set,
+#                         greetings_set, indicators_set, date_set)
+X = create_bow_matrix(all_data)
 Y = create_response_vector(all_data)
 
 print(X.shape)
